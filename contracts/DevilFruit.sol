@@ -9,29 +9,41 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract DevilFruit is ERC721, ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
 
-    Counters.Counter private _numberOfFruitsInTheWorld;
+    Counters.Counter private numberOfFruitsInTheWorld;
+    bool private isURIChangeable;
 
-    constructor() ERC721("Devil fruit", "DVF") {}
+    constructor(bool _isURIChangeable) ERC721("Devil fruit", "DVF") {
+        isURIChangeable = _isURIChangeable;
+    }
 
-    function grantDevilFruit(address to, string memory uri) public onlyOwner {
-        uint256 newFruitNumber = _numberOfFruitsInTheWorld.current();
-        _numberOfFruitsInTheWorld.increment();
-        _safeMint(to, newFruitNumber);
-        _setTokenURI(newFruitNumber, uri);
+    function grantDevilFruit(address _to, string calldata _uri) public onlyOwner {
+        uint256 newFruitNumber = numberOfFruitsInTheWorld.current();
+        numberOfFruitsInTheWorld.increment();
+        _safeMint(_to, newFruitNumber);
+        _setTokenURI(newFruitNumber, _uri);
+    }
+
+    function updateFruitURI(uint256 _fruitId, string calldata _newURI) external onlyOwner {
+        require(isURIChangeable, "Existing fruits URIs have been frozen forever");
+        _setTokenURI(_fruitId, _newURI);
+    }
+
+    function frozeFruitsURI() external onlyOwner {
+        isURIChangeable = false;
     }
 
     // The following functions are overrides required by Solidity.
 
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
-        super._burn(tokenId);
+    function _burn(uint256 _tokenId) internal override(ERC721, ERC721URIStorage) {
+        super._burn(_tokenId);
     }
 
-    function tokenURI(uint256 tokenId)
+    function tokenURI(uint256 _tokenId)
         public
         view
         override(ERC721, ERC721URIStorage)
         returns (string memory)
     {
-        return super.tokenURI(tokenId);
+        return super.tokenURI(_tokenId);
     }
 }

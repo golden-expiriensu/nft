@@ -4,7 +4,7 @@ async function main() {
   const addr = await ethers.getSigners();
 
   const NFT = await ethers.getContractFactory("DevilFruit");
-  const nft = await NFT.connect(addr[1]).deploy();
+  const nft = await NFT.connect(addr[1]).deploy(true);
 
   await nft.deployed();
 
